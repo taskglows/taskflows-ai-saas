@@ -3,6 +3,7 @@ import Hero from "@/sections/Hero";
 import TrustedBy from "@/sections/TrustedBy";
 import Features from "@/sections/Features";
 import DashboardPreview from "@/sections/DashboardPreview";
+import Pricing from "@/sections/Pricing";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <TrustedBy />
       <Features />
       <DashboardPreview />
+      <Pricing />
     </main>
   );
 }
