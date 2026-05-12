@@ -9,7 +9,7 @@ import Pricing from "@/sections/Pricing";
 
 export default function Home() {
   return (
-    <main className="bg-black min-h-screen">
+    <main className="bg-black min-h-screen pt-24">
       <Navbar />
       <Hero />
       <TrustedBy />

@@ -56,7 +56,7 @@ export default function Footer() {
 
         </div>
 
-        <div className="border-t border-white/10 mt-16 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/10 mt-16 pt-8 pb-8 flex flex-col md:flex-row items-center justify-between gap-4">
 
           <p className="text-gray-500 text-sm">
             © 2026 TaskFlows AI. All rights reserved.
