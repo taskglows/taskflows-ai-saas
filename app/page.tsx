@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/sections/Hero";
 import TrustedBy from "@/sections/TrustedBy";
 import Features from "@/sections/Features";
+import DashboardPreview from "@/sections/DashboardPreview";
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
       <Hero />
       <TrustedBy />
       <Features />
+      <DashboardPreview />
     </main>
   );
 }
