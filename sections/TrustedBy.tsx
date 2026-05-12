@@ -1,17 +1,9 @@
 export default function TrustedBy() {
-  const companies = [
-    "Microsoft",
-    "OpenAI",
-    "Amazon",
-    "Stripe",
-    "Notion",
-    "Vercel",
-  ];
+  const companies = ["Microsoft", "OpenAI", "Amazon", "Stripe", "Notion", "Vercel"];
 
   return (
     <section className="bg-black py-24 border-t border-white/5">
       <div className="max-w-6xl mx-auto px-6">
-
         <p className="text-center text-sm uppercase tracking-[0.3em] text-gray-500 mb-12">
           Trusted by modern AI teams
         </p>
@@ -26,7 +18,6 @@ export default function TrustedBy() {
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );
