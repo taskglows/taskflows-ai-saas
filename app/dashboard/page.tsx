@@ -6,11 +6,22 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Sidebar from "@/components/Sidebar";
 
+type Workflow = {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+};
+
 export default function DashboardPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
+  const [userId, setUserId] = useState("");
+
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [newWorkflowTitle, setNewWorkflowTitle] = useState("");
 
   useEffect(() => {
     checkUser();
@@ -27,7 +38,62 @@ export default function DashboardPage() {
     }
 
     setEmail(user.email || "");
+    setUserId(user.id);
+
+    await loadWorkflows(user.id);
+
     setLoading(false);
+  }
+
+  async function loadWorkflows(uid: string) {
+    const { data, error } = await supabase
+      .from("workflows")
+      .select("*")
+      .eq("user_id", uid)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setWorkflows(data || []);
+  }
+
+  async function createWorkflow() {
+    if (!newWorkflowTitle.trim()) {
+      alert("Please enter workflow title");
+      return;
+    }
+
+    if (!userId) {
+      alert("User not loaded yet");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("workflows")
+      .insert({
+        user_id: userId,
+        title: newWorkflowTitle.trim(),
+        description: "AI automation workflow",
+        status: "active",
+      })
+      .select();
+
+    if (error) {
+      console.error(error);
+      alert("Supabase error: " + error.message);
+      return;
+    }
+
+    console.log("Workflow created:", data);
+
+    setNewWorkflowTitle("");
+
+    await loadWorkflows(userId);
+
+    alert("Workflow created successfully");
   }
 
   async function handleLogout() {
@@ -79,7 +145,7 @@ export default function DashboardPage() {
             </p>
 
             <h2 className="text-5xl font-bold">
-              12
+              {workflows.length}
             </h2>
           </div>
 
@@ -119,45 +185,55 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <button className="bg-white text-black px-6 py-3 rounded-2xl font-semibold hover:scale-105 transition">
-              Create Workflow
-            </button>
+            <div className="flex gap-4">
+
+              <input
+                type="text"
+                placeholder="New workflow title"
+                value={newWorkflowTitle}
+                onChange={(e) => setNewWorkflowTitle(e.target.value)}
+                className="rounded-2xl border border-white/10 bg-black/40 px-5 py-3 text-white placeholder:text-gray-500"
+              />
+
+              <button
+                onClick={createWorkflow}
+                className="bg-white text-black px-6 py-3 rounded-2xl font-semibold hover:scale-105 transition"
+              >
+                Create Workflow
+              </button>
+
+            </div>
 
           </div>
 
           <div className="space-y-4">
 
-            <div className="rounded-2xl border border-white/10 bg-black/40 p-6 flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-semibold">
-                  Invoice AI Processing
-                </h3>
+            {workflows.map((workflow) => (
+              <div
+                key={workflow.id}
+                className="rounded-2xl border border-white/10 bg-black/40 p-6 flex items-center justify-between"
+              >
+                <div>
+                  <h3 className="text-xl font-semibold">
+                    {workflow.title}
+                  </h3>
 
-                <p className="text-gray-400 mt-1">
-                  Active workflow
-                </p>
+                  <p className="text-gray-400 mt-1">
+                    {workflow.description}
+                  </p>
+                </div>
+
+                <span className="text-green-400">
+                  {workflow.status}
+                </span>
               </div>
+            ))}
 
-              <span className="text-green-400">
-                Running
-              </span>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-black/40 p-6 flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-semibold">
-                  Email Security Scanner
-                </h3>
-
-                <p className="text-gray-400 mt-1">
-                  Scheduled workflow
-                </p>
+            {workflows.length === 0 && (
+              <div className="text-gray-500">
+                No workflows yet.
               </div>
-
-              <span className="text-yellow-400">
-                Pending
-              </span>
-            </div>
+            )}
 
           </div>
 
