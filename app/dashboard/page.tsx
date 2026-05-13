@@ -101,9 +101,7 @@ export default function DashboardPage() {
 
     const { error } = await supabase
       .from("workflows")
-      .update({
-        title: editingTitle.trim(),
-      })
+      .update({ title: editingTitle.trim() })
       .eq("id", id)
       .eq("user_id", userId);
 
@@ -157,10 +155,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-12">
           <div>
             <h1 className="text-5xl font-bold">Dashboard</h1>
-
-            <p className="text-gray-400 mt-2">
-              Welcome back, {email}
-            </p>
+            <p className="text-gray-400 mt-2">Welcome back, {email}</p>
           </div>
 
           <button
@@ -173,28 +168,17 @@ export default function DashboardPage() {
 
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-            <p className="text-gray-400 text-sm mb-3">
-              Active Workflows
-            </p>
-
-            <h2 className="text-5xl font-bold">
-              {workflows.length}
-            </h2>
+            <p className="text-gray-400 text-sm mb-3">Active Workflows</p>
+            <h2 className="text-5xl font-bold">{workflows.length}</h2>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-            <p className="text-gray-400 text-sm mb-3">
-              AI Agents
-            </p>
-
+            <p className="text-gray-400 text-sm mb-3">AI Agents</p>
             <h2 className="text-5xl font-bold">4</h2>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-            <p className="text-gray-400 text-sm mb-3">
-              Executions
-            </p>
-
+            <p className="text-gray-400 text-sm mb-3">Executions</p>
             <h2 className="text-5xl font-bold">2.4k</h2>
           </div>
         </div>
@@ -202,10 +186,7 @@ export default function DashboardPage() {
         <div className="rounded-[32px] border border-white/10 bg-white/5 p-10 min-h-[400px]">
           <div className="flex items-center justify-between mb-10 gap-6">
             <div>
-              <h2 className="text-3xl font-bold">
-                Recent Workflows
-              </h2>
-
+              <h2 className="text-3xl font-bold">Recent Workflows</h2>
               <p className="text-gray-400 mt-2">
                 Monitor and manage your AI automations.
               </p>
@@ -235,12 +216,18 @@ export default function DashboardPage() {
                 key={workflow.id}
                 className="rounded-2xl border border-white/10 bg-black/40 p-6 flex items-center justify-between gap-6"
               >
-                <div className="flex-1">
+                <div
+                  className="flex-1 cursor-pointer"
+                  onClick={() =>
+                    router.push(`/dashboard/workflows/${workflow.id}`)
+                  }
+                >
                   {editingId === workflow.id ? (
                     <input
                       type="text"
                       value={editingTitle}
                       onChange={(e) => setEditingTitle(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white"
                     />
                   ) : (
@@ -248,7 +235,6 @@ export default function DashboardPage() {
                       <h3 className="text-xl font-semibold">
                         {workflow.title}
                       </h3>
-
                       <p className="text-gray-400 mt-1">
                         {workflow.description}
                       </p>
@@ -257,9 +243,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <span className="text-green-400">
-                    {workflow.status}
-                  </span>
+                  <span className="text-green-400">{workflow.status}</span>
 
                   {editingId === workflow.id ? (
                     <>
@@ -297,9 +281,7 @@ export default function DashboardPage() {
             ))}
 
             {workflows.length === 0 && (
-              <div className="text-gray-500">
-                No workflows yet.
-              </div>
+              <div className="text-gray-500">No workflows yet.</div>
             )}
           </div>
         </div>
