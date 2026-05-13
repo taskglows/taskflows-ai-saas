@@ -39,9 +39,7 @@ export default function DashboardPage() {
 
     setEmail(user.email || "");
     setUserId(user.id);
-
     await loadWorkflows(user.id);
-
     setLoading(false);
   }
 
@@ -53,7 +51,7 @@ export default function DashboardPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error(error);
+      alert("Load error: " + error.message);
       return;
     }
 
@@ -66,34 +64,39 @@ export default function DashboardPage() {
       return;
     }
 
-    if (!userId) {
-      alert("User not loaded yet");
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("workflows")
-      .insert({
-        user_id: userId,
-        title: newWorkflowTitle.trim(),
-        description: "AI automation workflow",
-        status: "active",
-      })
-      .select();
+    const { error } = await supabase.from("workflows").insert({
+      user_id: userId,
+      title: newWorkflowTitle.trim(),
+      description: "AI automation workflow",
+      status: "active",
+    });
 
     if (error) {
-      console.error(error);
-      alert("Supabase error: " + error.message);
+      alert("Create error: " + error.message);
       return;
     }
 
-    console.log("Workflow created:", data);
-
     setNewWorkflowTitle("");
+    await loadWorkflows(userId);
+  }
+
+  async function deleteWorkflow(id: string) {
+    const confirmed = confirm("Delete this workflow?");
+
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from("workflows")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", userId);
+
+    if (error) {
+      alert("Delete error: " + error.message);
+      return;
+    }
 
     await loadWorkflows(userId);
-
-    alert("Workflow created successfully");
   }
 
   async function handleLogout() {
@@ -111,17 +114,12 @@ export default function DashboardPage() {
 
   return (
     <main className="bg-black text-white min-h-screen flex">
-
       <Sidebar />
 
       <section className="flex-1 p-10">
-
         <div className="flex items-center justify-between mb-12">
-
           <div>
-            <h1 className="text-5xl font-bold">
-              Dashboard
-            </h1>
+            <h1 className="text-5xl font-bold">Dashboard</h1>
 
             <p className="text-gray-400 mt-2">
               Welcome back, {email}
@@ -134,11 +132,9 @@ export default function DashboardPage() {
           >
             Logout
           </button>
-
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-10">
-
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
             <p className="text-gray-400 text-sm mb-3">
               Active Workflows
@@ -154,9 +150,7 @@ export default function DashboardPage() {
               AI Agents
             </p>
 
-            <h2 className="text-5xl font-bold">
-              4
-            </h2>
+            <h2 className="text-5xl font-bold">4</h2>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
@@ -164,17 +158,12 @@ export default function DashboardPage() {
               Executions
             </p>
 
-            <h2 className="text-5xl font-bold">
-              2.4k
-            </h2>
+            <h2 className="text-5xl font-bold">2.4k</h2>
           </div>
-
         </div>
 
         <div className="rounded-[32px] border border-white/10 bg-white/5 p-10 min-h-[400px]">
-
-          <div className="flex items-center justify-between mb-10">
-
+          <div className="flex items-center justify-between mb-10 gap-6">
             <div>
               <h2 className="text-3xl font-bold">
                 Recent Workflows
@@ -186,7 +175,6 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex gap-4">
-
               <input
                 type="text"
                 placeholder="New workflow title"
@@ -201,17 +189,14 @@ export default function DashboardPage() {
               >
                 Create Workflow
               </button>
-
             </div>
-
           </div>
 
           <div className="space-y-4">
-
             {workflows.map((workflow) => (
               <div
                 key={workflow.id}
-                className="rounded-2xl border border-white/10 bg-black/40 p-6 flex items-center justify-between"
+                className="rounded-2xl border border-white/10 bg-black/40 p-6 flex items-center justify-between gap-6"
               >
                 <div>
                   <h3 className="text-xl font-semibold">
@@ -223,9 +208,18 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
-                <span className="text-green-400">
-                  {workflow.status}
-                </span>
+                <div className="flex items-center gap-4">
+                  <span className="text-green-400">
+                    {workflow.status}
+                  </span>
+
+                  <button
+                    onClick={() => deleteWorkflow(workflow.id)}
+                    className="border border-red-500/30 text-red-400 px-4 py-2 rounded-xl hover:bg-red-500/10 transition"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
 
@@ -234,13 +228,9 @@ export default function DashboardPage() {
                 No workflows yet.
               </div>
             )}
-
           </div>
-
         </div>
-
       </section>
-
     </main>
   );
 }
