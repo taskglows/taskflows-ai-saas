@@ -23,6 +23,9 @@ export default function DashboardPage() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [newWorkflowTitle, setNewWorkflowTitle] = useState("");
 
+  const [editingId, setEditingId] = useState("");
+  const [editingTitle, setEditingTitle] = useState("");
+
   useEffect(() => {
     checkUser();
   }, []);
@@ -77,6 +80,40 @@ export default function DashboardPage() {
     }
 
     setNewWorkflowTitle("");
+    await loadWorkflows(userId);
+  }
+
+  function startEdit(workflow: Workflow) {
+    setEditingId(workflow.id);
+    setEditingTitle(workflow.title);
+  }
+
+  function cancelEdit() {
+    setEditingId("");
+    setEditingTitle("");
+  }
+
+  async function saveEdit(id: string) {
+    if (!editingTitle.trim()) {
+      alert("Title cannot be empty");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("workflows")
+      .update({
+        title: editingTitle.trim(),
+      })
+      .eq("id", id)
+      .eq("user_id", userId);
+
+    if (error) {
+      alert("Update error: " + error.message);
+      return;
+    }
+
+    setEditingId("");
+    setEditingTitle("");
     await loadWorkflows(userId);
   }
 
@@ -198,20 +235,56 @@ export default function DashboardPage() {
                 key={workflow.id}
                 className="rounded-2xl border border-white/10 bg-black/40 p-6 flex items-center justify-between gap-6"
               >
-                <div>
-                  <h3 className="text-xl font-semibold">
-                    {workflow.title}
-                  </h3>
+                <div className="flex-1">
+                  {editingId === workflow.id ? (
+                    <input
+                      type="text"
+                      value={editingTitle}
+                      onChange={(e) => setEditingTitle(e.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-black px-4 py-3 text-white"
+                    />
+                  ) : (
+                    <>
+                      <h3 className="text-xl font-semibold">
+                        {workflow.title}
+                      </h3>
 
-                  <p className="text-gray-400 mt-1">
-                    {workflow.description}
-                  </p>
+                      <p className="text-gray-400 mt-1">
+                        {workflow.description}
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-4">
                   <span className="text-green-400">
                     {workflow.status}
                   </span>
+
+                  {editingId === workflow.id ? (
+                    <>
+                      <button
+                        onClick={() => saveEdit(workflow.id)}
+                        className="border border-green-500/30 text-green-400 px-4 py-2 rounded-xl hover:bg-green-500/10 transition"
+                      >
+                        Save
+                      </button>
+
+                      <button
+                        onClick={cancelEdit}
+                        className="border border-white/10 text-gray-300 px-4 py-2 rounded-xl hover:bg-white/10 transition"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => startEdit(workflow)}
+                      className="border border-blue-500/30 text-blue-400 px-4 py-2 rounded-xl hover:bg-blue-500/10 transition"
+                    >
+                      Edit
+                    </button>
+                  )}
 
                   <button
                     onClick={() => deleteWorkflow(workflow.id)}
